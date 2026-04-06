@@ -908,7 +908,7 @@ export default function Home() {
                   </div>
                   <div>
                     <div className="font-semibold text-sm mb-0.5">Email</div>
-                    <a href="mailto:info@fortisbrothers.com" className="text-warm-600 text-sm hover:text-gold-500 transition-colors">info@fortisbrothers.com</a>
+                    <a href="mailto:contact@fortis-brothers.com" className="text-warm-600 text-sm hover:text-gold-500 transition-colors">contact@fortis-brothers.com</a>
                   </div>
                 </div>
 
@@ -944,9 +944,14 @@ export default function Home() {
                 <div className="bg-white rounded-[calc(2rem-0.5rem)] p-8 md:p-10">
                   <h3 className="font-display text-2xl font-semibold tracking-tight mb-2">Request a Free Estimate</h3>
                   <p className="text-warm-500 text-sm mb-8">Fill out the form and we will contact you within 24 hours.</p>
-                  <form action="https://formsubmit.co/info@fortisbrothers.com" method="POST" className="space-y-5">
-                    <input type="hidden" name="_captcha" value="false" />
-                    <input type="hidden" name="_next" value="https://fortisbrothers.com/#contact" />
+                  <form action="https://formsubmit.co/contact@fortis-brothers.com" method="POST" className="space-y-5">
+                    <input type="hidden" name="_captcha" value="true" />
+                    <input type="hidden" name="_next" value="https://fortis-brothers.com/#contact" />
+                    <input type="hidden" name="_subject" value="New Estimate Request - Fortis Brothers Website" />
+                    <input type="hidden" name="_template" value="table" />
+                    <input type="hidden" name="_autoresponse" value="Thank you for contacting Fortis Brothers! We received your estimate request and will get back to you within 24 hours. If urgent, call us at (305) 922-3498." />
+                    {/* Honeypot anti-spam field - hidden from users, bots fill it in */}
+                    <input type="text" name="_honey" style={{ display: "none" }} tabIndex={-1} autoComplete="off" />
                     <div>
                       <label className="block text-sm font-medium mb-1.5">Full Name</label>
                       <input type="text" name="name" required placeholder="Your name" className="w-full px-4 py-3 text-sm bg-warm-50 border border-warm-200/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-400/40 focus:border-gold-400 transition-all duration-300 placeholder:text-warm-400"/>
@@ -1039,7 +1044,7 @@ export default function Home() {
                   <a href="tel:+13059223498" className="hover:text-gold-400 transition-colors">(305) 922-3498</a>
                 </li>
                 <li>
-                  <a href="mailto:info@fortisbrothers.com" className="hover:text-gold-400 transition-colors">info@fortisbrothers.com</a>
+                  <a href="mailto:contact@fortis-brothers.com" className="hover:text-gold-400 transition-colors">contact@fortis-brothers.com</a>
                 </li>
                 <li>
                   <a href="https://www.instagram.com/fortisbrothers/" target="_blank" rel="noopener noreferrer" className="hover:text-gold-400 transition-colors">Instagram: @fortisbrothers</a>
