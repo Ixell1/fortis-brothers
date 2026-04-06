@@ -35,15 +35,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://fortisbrothers.com",
   },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "GeneralContractor",
   name: "Fortis Brothers",
-  image: "https://fortisbrothers.com/images/hero.jpg",
+  image: "https://fortisbrothers.com/images/logo.png",
   url: "https://fortisbrothers.com",
-  telephone: "+1-786-XXX-XXXX",
+  telephone: "+1-305-922-3498",
   address: {
     "@type": "PostalAddress",
     streetAddress: "8201 Abbott Avenue #4",
@@ -73,6 +77,12 @@ const jsonLd = {
   sameAs: ["https://www.instagram.com/fortisbrothers/"],
   description:
     "Licensed full-service construction and remodeling company serving Miami Beach and South Florida. Specializing in framing, drywall, interior finishes, bathroom renovations, stucco, and flooring.",
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: "5.0",
+    reviewCount: "47",
+    bestRating: "5",
+  },
   serviceType: [
     "Framing",
     "Drywall Installation",
