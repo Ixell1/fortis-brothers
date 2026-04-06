@@ -40,26 +40,45 @@ function BeforeAfter({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState(50);
-  const dragging = useRef(false);
 
-  const handleMove = (clientX: number) => {
-    if (!containerRef.current || !dragging.current) return;
+  const handleMove = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = ((clientX - rect.left) / rect.width) * 100;
-    setPos(Math.max(2, Math.min(98, x)));
-  };
+    setPos(Math.max(0.5, Math.min(99.5, x)));
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    let active = false;
+
+    const onDown = () => { active = true; };
+    const onUp = () => { active = false; };
+    const onMouseMove = (e: MouseEvent) => { if (active) { e.preventDefault(); handleMove(e.clientX); } };
+    const onTouchMove = (e: TouchEvent) => { if (active) { e.preventDefault(); handleMove(e.touches[0].clientX); } };
+
+    el.addEventListener("mousedown", onDown);
+    el.addEventListener("touchstart", onDown, { passive: true });
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("mousemove", onMouseMove);
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+
+    return () => {
+      el.removeEventListener("mousedown", onDown);
+      el.removeEventListener("touchstart", onDown);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchend", onUp);
+      window.removeEventListener("mousemove", onMouseMove);
+      el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [handleMove]);
 
   return (
     <div
       ref={containerRef}
       className="relative w-full aspect-[4/3] rounded-[1.5rem] overflow-hidden cursor-ew-resize select-none group"
-      onMouseDown={() => (dragging.current = true)}
-      onMouseUp={() => (dragging.current = false)}
-      onMouseLeave={() => (dragging.current = false)}
-      onMouseMove={(e) => handleMove(e.clientX)}
-      onTouchStart={() => (dragging.current = true)}
-      onTouchEnd={() => (dragging.current = false)}
-      onTouchMove={(e) => handleMove(e.touches[0].clientX)}
     >
       <Image
         src={after}
@@ -278,13 +297,15 @@ function Navbar() {
       >
         <div className="max-w-[1400px] mx-auto px-6 md:px-10 flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="#" className="flex items-center gap-3 group">
+          <a href="#" className="flex items-center group">
             <Image
               src="/images/logo.png"
               alt="Fortis Brothers Construction logo"
-              width={48}
-              height={48}
-              className="h-12 w-auto transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
+              width={180}
+              height={89}
+              className="h-14 w-auto object-contain transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
+              priority
+              unoptimized
             />
           </a>
 
@@ -454,19 +475,16 @@ function VideoReel() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children reveal">
           {[1, 2, 3, 4].map((n) => (
-            <div key={n} className="p-1.5 bg-white/5 rounded-[1.5rem] ring-1 ring-white/10">
-              <div className="rounded-[calc(1.5rem-0.375rem)] overflow-hidden">
-                <video
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full aspect-[9/16] object-cover"
-                  poster={`/images/bathroom-luxury.jpg`}
-                >
-                  <source src={`/videos/project-${n}.mp4`} type="video/mp4" />
-                </video>
-              </div>
+            <div key={n} className="rounded-[1.5rem] overflow-hidden bg-black">
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full aspect-[9/16] object-cover block"
+              >
+                <source src={`/videos/project-${n}.mp4`} type="video/mp4" />
+              </video>
             </div>
           ))}
         </div>
@@ -487,63 +505,59 @@ function MiamiServiceArea() {
   ];
 
   return (
-    <section className="py-24 md:py-36 border-b border-warm-200/50 overflow-hidden">
+    <section className="py-24 md:py-36 overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-        <div className="text-center mb-16 reveal">
-          <span className="inline-block text-[10px] uppercase tracking-[0.2em] font-semibold text-gold-500 bg-gold-400/10 px-3 py-1.5 rounded-full mb-5">
-            Service Area
-          </span>
-          <h2 className="font-display text-4xl md:text-5xl font-bold tracking-tighter mb-4">
-            Serving All of <span className="text-warm-400">South Florida</span>
-          </h2>
-          <p className="text-warm-600 text-base max-w-[50ch] mx-auto">
-            We work across Miami-Dade and Broward counties. Here are some of the communities we serve regularly.
-          </p>
-        </div>
+        {/* Aura FitPass style card */}
+        <div className="relative rounded-[2.5rem] overflow-hidden bg-espresso min-h-[520px] reveal">
+          {/* Background image - right side on desktop, full on mobile */}
+          <div className="absolute inset-0 md:left-[40%]">
+            <Image
+              src="/images/miami-drone.jpg"
+              alt="Aerial drone view of Miami Beach coastline"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 60vw"
+            />
+          </div>
+          {/* Gradient overlay - stronger on left for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-espresso via-espresso/95 md:via-espresso/80 to-espresso/20 md:to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-espresso/60 via-transparent to-transparent md:hidden" />
 
-        {/* Map visualization */}
-        <div className="relative max-w-3xl mx-auto mb-16 reveal">
-          <div className="relative aspect-square max-w-lg mx-auto">
-            {/* Background circle / radius */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gold-400/10 via-warm-100/40 to-gold-400/5 ring-2 ring-gold-400/20" />
-            <div className="absolute inset-[12%] rounded-full bg-gradient-to-br from-gold-400/8 via-transparent to-warm-200/20 ring-1 ring-gold-400/15" />
-            <div className="absolute inset-[28%] rounded-full bg-gradient-to-br from-gold-400/15 via-warm-50/30 to-transparent ring-1 ring-gold-400/25" />
+          {/* Content - left aligned */}
+          <div className="relative z-10 p-8 md:p-14 lg:p-16 flex flex-col justify-center min-h-[520px] max-w-xl">
+            <span className="inline-block text-[10px] uppercase tracking-[0.2em] font-semibold text-gold-400 bg-gold-400/15 px-3 py-1.5 rounded-full mb-6 w-fit">
+              Service Area
+            </span>
+            <h2 className="font-display text-4xl md:text-5xl font-bold tracking-tighter text-white mb-5 leading-[0.95]">
+              Serving All of<br/><span className="text-gold-400">South Florida</span>
+            </h2>
+            <p className="text-warm-300 text-base leading-relaxed mb-8 max-w-[45ch]">
+              From Miami Beach to Fort Lauderdale and everywhere in between. Our crews operate within a 150-mile radius, covering Miami-Dade and Broward counties.
+            </p>
 
-            {/* Center pin */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center">
-              <div className="w-16 h-16 rounded-full bg-gold-500 shadow-[0_0_40px_rgba(201,169,110,0.4)] flex items-center justify-center mb-2">
-                <Image src="/images/logo.png" alt="Fortis Brothers" width={40} height={40} className="w-10 h-10 object-contain" />
+            {/* Radius badge */}
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #1a1612 0%, #3a3020 40%, #c9a96e 100%)" }}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-white">
+                  <path d="M10 10.75C11.2426 10.75 12.25 9.74264 12.25 8.5C12.25 7.25736 11.2426 6.25 10 6.25C8.75736 6.25 7.75 7.25736 7.75 8.5C7.75 9.74264 8.75736 10.75 10 10.75Z" stroke="currentColor" strokeWidth="1.2"/>
+                  <path d="M10 18C10 18 17 13 17 8.5C17 4.91015 13.866 2 10 2C6.13401 2 3 4.91015 3 8.5C3 13 10 18 10 18Z" stroke="currentColor" strokeWidth="1.2"/>
+                </svg>
               </div>
-              <div className="bg-espresso text-cream text-[10px] uppercase tracking-[0.15em] font-bold px-3 py-1.5 rounded-full whitespace-nowrap shadow-lg">
-                Miami Beach, FL
+              <div>
+                <div className="text-white font-semibold text-sm">150-Mile Radius</div>
+                <div className="text-warm-400 text-xs">Based in Miami Beach, FL</div>
               </div>
             </div>
 
-            {/* Decorative palm silhouettes via SVG */}
-            <svg className="absolute bottom-[8%] left-[10%] w-16 h-16 text-warm-300/40" viewBox="0 0 64 64" fill="currentColor">
-              <path d="M32 58V30M32 30C28 20 18 14 10 16C16 20 22 26 32 30ZM32 30C36 20 46 14 54 16C48 20 42 26 32 30ZM32 30C28 18 20 8 12 4C18 12 24 22 32 30ZM32 30C36 18 44 8 52 4C46 12 40 22 32 30Z"/>
-            </svg>
-            <svg className="absolute top-[10%] right-[8%] w-12 h-12 text-warm-300/30 rotate-12" viewBox="0 0 64 64" fill="currentColor">
-              <path d="M32 58V30M32 30C28 20 18 14 10 16C16 20 22 26 32 30ZM32 30C36 20 46 14 54 16C48 20 42 26 32 30ZM32 30C28 18 20 8 12 4C18 12 24 22 32 30ZM32 30C36 18 44 8 52 4C46 12 40 22 32 30Z"/>
-            </svg>
-            <svg className="absolute bottom-[15%] right-[15%] w-10 h-10 text-warm-200/30 -rotate-6" viewBox="0 0 64 64" fill="currentColor">
-              <path d="M32 58V30M32 30C28 20 18 14 10 16C16 20 22 26 32 30ZM32 30C36 20 46 14 54 16C48 20 42 26 32 30ZM32 30C28 18 20 8 12 4C18 12 24 22 32 30ZM32 30C36 18 44 8 52 4C46 12 40 22 32 30Z"/>
-            </svg>
-
-            {/* Radius label */}
-            <div className="absolute top-[5%] left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.15em] font-semibold text-warm-400 bg-cream px-3 py-1 rounded-full ring-1 ring-warm-200/40">
-              50-Mile Radius
+            {/* Area pills */}
+            <div className="flex flex-wrap gap-2">
+              {areas.map((area) => (
+                <span key={area} className="text-xs font-medium text-warm-300 bg-white/10 backdrop-blur-sm px-3.5 py-1.5 rounded-full ring-1 ring-white/10">
+                  {area}
+                </span>
+              ))}
             </div>
           </div>
-        </div>
-
-        {/* Area pills */}
-        <div className="flex flex-wrap justify-center gap-3 stagger-children reveal">
-          {areas.map((area) => (
-            <span key={area} className="text-sm font-medium text-warm-700 bg-warm-50 px-5 py-2.5 rounded-full ring-1 ring-warm-200/50">
-              {area}
-            </span>
-          ))}
         </div>
       </div>
     </section>
@@ -559,7 +573,7 @@ export default function Home() {
   const services = [
     {
       title: "Framing",
-      image: "/images/framing-stock.jpg",
+      image: "/images/framing-real.jpg",
       description:
         "Every great structure begins with a solid frame. Our experienced framing crew handles residential and commercial projects across Miami-Dade and Broward counties, from new construction wood and metal stud framing to load-bearing wall modifications and structural reinforcements. We work closely with engineers and architects to deliver frames that meet Florida building code, pass inspections the first time, and set the stage for flawless finishing work. Whether you are building a single-family home in Miami Beach or framing out a new restaurant in Wynwood, Fortis Brothers delivers precision, speed, and structural integrity on every job.",
       features: ["Wood & Metal Stud", "Load-Bearing Walls", "New Construction", "Code Compliant", "Commercial & Residential", "Structural Reinforcement"],
@@ -587,7 +601,7 @@ export default function Home() {
     },
     {
       title: "Stucco",
-      image: "/images/stucco-stock.jpg",
+      image: "/images/stucco-real.jpg",
       description:
         "In South Florida, stucco is more than a finish material; it is your first line of defense against hurricane-force winds, tropical moisture, and relentless UV exposure. Fortis Brothers applies traditional three-coat stucco systems and modern EIFS (Exterior Insulation and Finish Systems) on residential and commercial exteriors throughout Miami-Dade County. We handle new stucco application on fresh construction, stucco patching and crack repair on older buildings, and full re-stucco projects that restore curb appeal and weather resistance. Our crews understand the specific challenges of coastal Florida construction and apply systems engineered for this climate.",
       features: ["Three-Coat System", "EIFS Application", "Crack Repair", "Weather Resistant", "Exterior Coating", "Hurricane Ready"],
@@ -628,7 +642,7 @@ export default function Home() {
               <span className="inline-block text-[10px] uppercase tracking-[0.25em] font-semibold text-gold-400 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full opacity-0 animate-fade-up" style={{ animationDelay: "0.2s" }}>
                 Miami Beach, FL -- Licensed & Insured
               </span>
-              <span className="inline-block text-[10px] uppercase tracking-[0.25em] font-bold text-white bg-emerald-600/80 backdrop-blur-sm px-4 py-2 rounded-full opacity-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+              <span className="inline-block text-[10px] uppercase tracking-[0.25em] font-bold text-white backdrop-blur-sm px-4 py-2 rounded-full opacity-0 animate-fade-up" style={{ animationDelay: "0.3s", background: "linear-gradient(135deg, #1a1612 0%, #3a3020 40%, #c9a96e 100%)" }}>
                 English Speaking Crew
               </span>
             </div>
@@ -995,7 +1009,7 @@ export default function Home() {
             {/* Brand */}
             <div>
               <div className="flex items-center gap-3 mb-5">
-                <Image src="/images/logo.png" alt="Fortis Brothers" width={48} height={48} className="h-12 w-auto brightness-0 invert opacity-90" />
+                <Image src="/images/logo.png" alt="Fortis Brothers" width={180} height={89} className="h-14 w-auto object-contain opacity-90" unoptimized />
               </div>
               <p className="text-sm leading-relaxed max-w-[35ch]">
                 Licensed full-service construction company based in Miami Beach, FL. Serving residential and commercial clients across South Florida.
